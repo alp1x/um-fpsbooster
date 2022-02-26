@@ -4,14 +4,14 @@
 [![License MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge&logo=opensourceinitiative)](https://choosealicense.com/licenses/mit/)
 
 
-You can use command /fps to open the menu
-the script have 3 type of settings: Ultra low, Low, Medium
++ **You can use command /fps to open the menu
+the script have 3 type of settings: Ultra low, Low, Medium**
 
 <p align="center">
   <img  src="https://media.discordapp.net/attachments/773578839414013952/947012474249564230/12412412321.png">
 </p>
 
-+ Tested on a GeForce RTX 2060 (6gb) (All game settings high)
++ **Tested on a GeForce RTX 2060 (6gb) (All game settings high)**
 
   <p align="center">
   <img  src="https://forum.cfx.re/uploads/default/original/4X/7/f/a/7fad2268386f5d491f401f2d356fd31a567e8a0c.png">
