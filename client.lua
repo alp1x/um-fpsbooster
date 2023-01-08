@@ -1,6 +1,72 @@
 
 local QBCore = exports['qb-core']:GetCoreObject()
 local type 
+--// Entity Enumerator (https://gist.github.com/IllidanS4/9865ed17f60576425369fc1da70259b2#file-entityiter-lua)
+local entityEnumerator = {
+    __gc = function(enum)
+        if enum.destructor and enum.handle then
+            enum.destructor(enum.handle)
+        end
+        enum.destructor = nil
+        enum.handle = nil
+    end
+}
+
+local function EnumerateEntities(initFunc, moveFunc, disposeFunc)
+    return coroutine.wrap(
+        function()
+            local iter, id = initFunc()
+            if not id or id == 0 then
+                disposeFunc(iter)
+                return
+            end
+
+            local enum = {handle = iter, destructor = disposeFunc}
+            setmetatable(enum, entityEnumerator)
+
+            local next = true
+            repeat
+                coroutine.yield(id)
+                next, id = moveFunc(iter)
+            until not next
+
+            enum.destructor, enum.handle = nil, nil
+            disposeFunc(iter)
+        end
+    )
+end
+
+local function GetWorldObjects()
+    return EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject)
+end
+
+local function GetWorldPeds()
+    return EnumerateEntities(FindFirstPed, FindNextPed, EndFindPed)
+end
+
+local function GetWorldVehicles()
+    return EnumerateEntities(FindFirstVehicle, FindNextVehicle, EndFindVehicle)
+end
+
+local function GetWorldPickups()
+    return EnumerateEntities(FindFirstPickup, FindNextPickup, EndFindPickup)
+end
+
+local function FPSBoosterUM(shadow,air,entity,dynamic,tracker,depth,bounds,distance,tweak,sirens,lights,notify)
+    RopeDrawShadowEnabled(shadow)
+    CascadeShadowsClearShadowSampleType()
+    CascadeShadowsSetAircraftMode(air)
+    CascadeShadowsEnableEntityTracker(entity)
+    CascadeShadowsSetDynamicDepthMode(dynamic)
+    CascadeShadowsSetEntityTrackerScale(tracker)
+    CascadeShadowsSetDynamicDepthValue(depth)
+    CascadeShadowsSetCascadeBoundsScale(bounds)
+    SetFlashLightFadeDistance(distance)
+    SetLightsCutoffDistanceTweak(tweak)
+    DistantCopCarSirens(sirens)
+    SetArtificialLightsState(lights)
+    QBCore.Functions.Notify(notify,"success")
+end
 
 RegisterCommand("fps", function()
 	exports['qb-menu']:openMenu({
@@ -228,69 +294,3 @@ CreateThread(function()
     end
 end)
 
---// Entity Enumerator (https://gist.github.com/IllidanS4/9865ed17f60576425369fc1da70259b2#file-entityiter-lua)
-local entityEnumerator = {
-    __gc = function(enum)
-        if enum.destructor and enum.handle then
-            enum.destructor(enum.handle)
-        end
-        enum.destructor = nil
-        enum.handle = nil
-    end
-}
-
-local function EnumerateEntities(initFunc, moveFunc, disposeFunc)
-    return coroutine.wrap(
-        function()
-            local iter, id = initFunc()
-            if not id or id == 0 then
-                disposeFunc(iter)
-                return
-            end
-
-            local enum = {handle = iter, destructor = disposeFunc}
-            setmetatable(enum, entityEnumerator)
-
-            local next = true
-            repeat
-                coroutine.yield(id)
-                next, id = moveFunc(iter)
-            until not next
-
-            enum.destructor, enum.handle = nil, nil
-            disposeFunc(iter)
-        end
-    )
-end
-
-function GetWorldObjects()
-    return EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject)
-end
-
-function GetWorldPeds()
-    return EnumerateEntities(FindFirstPed, FindNextPed, EndFindPed)
-end
-
-function GetWorldVehicles()
-    return EnumerateEntities(FindFirstVehicle, FindNextVehicle, EndFindVehicle)
-end
-
-function GetWorldPickups()
-    return EnumerateEntities(FindFirstPickup, FindNextPickup, EndFindPickup)
-end
-
-function FPSBoosterUM(shadow,air,entity,dynamic,tracker,depth,bounds,distance,tweak,sirens,lights,notify)
-    RopeDrawShadowEnabled(shadow)
-    CascadeShadowsClearShadowSampleType()
-    CascadeShadowsSetAircraftMode(air)
-    CascadeShadowsEnableEntityTracker(entity)
-    CascadeShadowsSetDynamicDepthMode(dynamic)
-    CascadeShadowsSetEntityTrackerScale(tracker)
-    CascadeShadowsSetDynamicDepthValue(depth)
-    CascadeShadowsSetCascadeBoundsScale(bounds)
-    SetFlashLightFadeDistance(distance)
-    SetLightsCutoffDistanceTweak(tweak)
-    DistantCopCarSirens(sirens)
-    SetArtificialLightsState(lights)
-    QBCore.Functions.Notify(notify,"success")
-end
