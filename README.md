@@ -11,7 +11,14 @@
 Commands: /fps [type] (reset,ulow,low,medium)
 ```
 
-+ **Tested on a GeForce RTX 2060 (6gb) (All game settings high)**
+## Fixed
+* Walking on freeze peds
+* Burst of lights at night
+* Police lights bug
+
+
+## Tested
+* on a GeForce RTX 2060 (6gb) (All game settings high)
 
   <img  src="https://forum.cfx.re/uploads/default/original/4X/7/f/a/7fad2268386f5d491f401f2d356fd31a567e8a0c.png">
    <img  src="https://forum.cfx.re/uploads/default/original/4X/b/b/c/bbcd9a17083cb8a30e26fd9afa6ba3f739d7948c.png">
