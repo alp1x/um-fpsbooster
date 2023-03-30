@@ -1,144 +1,91 @@
+---@diagnostic disable: trailing-space
+local loopType = nil
 
-local QBCore = exports['qb-core']:GetCoreObject()
-local type 
---// Entity Enumerator (https://gist.github.com/IllidanS4/9865ed17f60576425369fc1da70259b2#file-entityiter-lua)
-local entityEnumerator = {
-    __gc = function(enum)
-        if enum.destructor and enum.handle then
-            enum.destructor(enum.handle)
-        end
-        enum.destructor = nil
-        enum.handle = nil
-    end
-}
+-- Functions
 
-local function EnumerateEntities(initFunc, moveFunc, disposeFunc)
-    return coroutine.wrap(
-        function()
-            local iter, id = initFunc()
-            if not id or id == 0 then
-                disposeFunc(iter)
-                return
-            end
-
-            local enum = {handle = iter, destructor = disposeFunc}
-            setmetatable(enum, entityEnumerator)
-
-            local next = true
-            repeat
-                coroutine.yield(id)
-                next, id = moveFunc(iter)
-            until not next
-
-            enum.destructor, enum.handle = nil, nil
-            disposeFunc(iter)
-        end
-    )
-end
-
-local function GetWorldObjects()
-    return EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject)
-end
-
-local function GetWorldPeds()
-    return EnumerateEntities(FindFirstPed, FindNextPed, EndFindPed)
-end
-
-local function GetWorldVehicles()
-    return EnumerateEntities(FindFirstVehicle, FindNextVehicle, EndFindVehicle)
-end
-
-local function GetWorldPickups()
-    return EnumerateEntities(FindFirstPickup, FindNextPickup, EndFindPickup)
-end
-
-local function FPSBoosterUM(shadow,air,entity,dynamic,tracker,depth,bounds,distance,tweak,sirens,lights,notify)
+--@param toggle shadow boolean
+--@param toggle air boolean
+local function setShadowAndAir(shadow, air)
     RopeDrawShadowEnabled(shadow)
     CascadeShadowsClearShadowSampleType()
     CascadeShadowsSetAircraftMode(air)
+end
+
+--@param toggle entity boolean
+--@param toggle dynamic boolean
+--@param toggle tracker number
+--@param toggle depth number
+--@param toggle bounds number
+local function setEntityTracker(entity, dynamic, tracker, depth, bounds)
     CascadeShadowsEnableEntityTracker(entity)
     CascadeShadowsSetDynamicDepthMode(dynamic)
     CascadeShadowsSetEntityTrackerScale(tracker)
     CascadeShadowsSetDynamicDepthValue(depth)
     CascadeShadowsSetCascadeBoundsScale(bounds)
-    SetFlashLightFadeDistance(distance)
-    SetLightsCutoffDistanceTweak(tweak)
-    DistantCopCarSirens(sirens)
-    SetArtificialLightsState(lights)
-    QBCore.Functions.Notify(notify,"success")
 end
 
-RegisterCommand("fps", function()
-	exports['qb-menu']:openMenu({
-        {
-            header = "🔥 FPS Booster Menu",
-            isMenuHeader = true, -- Set to true to make a nonclickable title
-        },
-        {
-            header = "Reset",
-            txt = "",
-            params = {
-                event = "qb-fpsbooster:client:event",
-                args = {
-                   type = "reset"
-                }
-            }
-        },
-        {
-            header = "Ultra Low",
-            txt = "",
-            params = {
-                event = "qb-fpsbooster:client:event",
-                args = {
-                    type = "ulow"
-                }
-            }
-        },
-        {
-            header = "Low",
-            txt = "",
-            params = {
-                event = "qb-fpsbooster:client:event",
-                args = {
-                    type = "low"
-                }
-            }
-        },
-        {
-            header = "Medium",
-            txt = "",
-            params = {
-                event = "qb-fpsbooster:client:event",
-                args = {
-                    type = "medium"
-                }
-            }
-        },
-    })
-end)
+--@param toggle distance number
+--@param toggle tweak number
+local function setLights(distance, tweak)
+    SetFlashLightFadeDistance(distance)
+    SetLightsCutoffDistanceTweak(tweak)
+end
 
-RegisterNetEvent('qb-fpsbooster:client:event', function(data)
-    if data.type == "reset" then
-        FPSBoosterUM(true,true,true,true,5.0,5.0,5.0,10.0,10.0,true,false,"Reset")
-    elseif data.type == "ulow" then
-        FPSBoosterUM(false,false,true,false,0.0,0.0,0.0,0.0,0.0,false,nil,"Ultralow")
-    elseif data.type == "low" then
-        FPSBoosterUM(false,false,true,false,0.0,0.0,0.0,5.0,5.0,false,nil,"Low")
-    elseif data.type == "medium" then
-        FPSBoosterUM(true,false,true,false,5.0,3.0,3.0,3.0,3.0,false,false,"Medium")
+--@param notify message string
+local function notify(message)
+    print(message)
+end
+
+--@param FPSBoost type string
+local function umfpsBooster(type)
+    if type == "reset" then
+        setShadowAndAir(true, true)
+        setEntityTracker(true, true, 5.0, 5.0, 5.0)
+        setLights(10.0, 10.0)
+        notify("Mode: Reset")
+    elseif type == "ulow" then
+        setShadowAndAir(false, false)
+        setEntityTracker(true, false, 0.0, 0.0, 0.0)
+        setLights(0.0, 0.0)
+        notify("Mode: Ultra Low")
+    elseif type == "low" then
+        setShadowAndAir(false, false)
+        setEntityTracker(true, false, 0.0, 0.0, 0.0)
+        setLights(5.0, 5.0)
+        notify("Mode: Low")
+    elseif type == "medium" then
+        setShadowAndAir(true, false)
+        setEntityTracker(true, false, 5.0, 3.0, 3.0)
+        setLights(3.0, 3.0)
+        notify("Mode: Medium")
+    else
+        notify("Usage: /fps [reset/ulow/low/medium]")
+        notify("Invalid type: "..type)
+        return
     end
-    type = data.type
-end)
+    loopType = type
+end
+
+-- Commands
+
+RegisterCommand("fps", function(_,args) 
+    if args[1] == nil then
+        notify("Usage: /fps [reset/ulow/low/medium]")
+        return
+    end
+    umfpsBooster(args[1]) 
+end, false)
+
+-- Main Loop
 
 -- // Distance rendering and entity handler (need a revision)
 CreateThread(function()
     while true do
-        if type == "ulow" then
+        if loopType == "ulow" then
             --// Find closest ped and set the alpha
             for ped in GetWorldPeds() do
                 if not IsEntityOnScreen(ped) then
                     SetEntityAlpha(ped, 0)
-                    SetEntityAsNoLongerNeeded(ped)
                 else
                     if GetEntityAlpha(ped) == 0 then
                         SetEntityAlpha(ped, 255)
@@ -146,11 +93,9 @@ CreateThread(function()
                         SetEntityAlpha(ped, 210)
                     end
                 end
-
                 SetPedAoBlobRendering(ped, false)
                 Wait(1)
             end
-
             --// Find closest object and set the alpha
             for obj in GetWorldObjects() do
                 if not IsEntityOnScreen(obj) then
@@ -165,19 +110,14 @@ CreateThread(function()
                 end
                 Wait(1)
             end
-
-
             DisableOcclusionThisFrame()
             SetDisableDecalRenderingThisFrame()
             RemoveParticleFxInRange(GetEntityCoords(PlayerPedId()), 10.0)
-            OverrideLodscaleThisFrame(0.4)
-            SetArtificialLightsState(true)
-        elseif type == "low" then
+        elseif loopType == "low" then
             --// Find closest ped and set the alpha
             for ped in GetWorldPeds() do
                 if not IsEntityOnScreen(ped) then
                     SetEntityAlpha(ped, 0)
-                    SetEntityAsNoLongerNeeded(ped)
                 else
                     if GetEntityAlpha(ped) == 0 then
                         SetEntityAlpha(ped, 255)
@@ -186,10 +126,8 @@ CreateThread(function()
                     end
                 end
                 SetPedAoBlobRendering(ped, false)
-
                 Wait(1)
             end
-
             --// Find closest object and set the alpha
             for obj in GetWorldObjects() do
                 if not IsEntityOnScreen(obj) then
@@ -204,27 +142,21 @@ CreateThread(function()
                 end
                 Wait(1)
             end
-
             SetDisableDecalRenderingThisFrame()
             RemoveParticleFxInRange(GetEntityCoords(PlayerPedId()), 10.0)
-            OverrideLodscaleThisFrame(0.6)
-            SetArtificialLightsState(true)
-        elseif type == "medium" then
+        elseif loopType == "medium" then
             --// Find closest ped and set the alpha
             for ped in GetWorldPeds() do
                 if not IsEntityOnScreen(ped) then
                     SetEntityAlpha(ped, 0)
-                    SetEntityAsNoLongerNeeded(ped)
                 else
                     if GetEntityAlpha(ped) == 0 then
                         SetEntityAlpha(ped, 255)
                     end
                 end
-
                 SetPedAoBlobRendering(ped, false)
                 Wait(1)
             end
-        
             --// Find closest object and set the alpha
             for obj in GetWorldObjects() do
                 if not IsEntityOnScreen(obj) then
@@ -237,8 +169,6 @@ CreateThread(function()
                 end
                 Wait(1)
             end
-
-            OverrideLodscaleThisFrame(0.8)
         else
             Wait(500)
         end
@@ -249,7 +179,7 @@ end)
 --// Clear broken thing, disable rain, disable wind and other tiny thing that dont require the frame tick
 CreateThread(function()
     while true do
-        if type == "ulow" or type == "low" then
+        if loopType == "ulow" or loopType == "low" then
             ClearAllBrokenGlass()
             ClearAllHelpMessages()
             LeaderboardsReadClearAll()
@@ -260,7 +190,6 @@ CreateThread(function()
             ClearReplayStats()
             LeaderboardsClearCacheData()
             ClearFocus()
-            ClearHdArea()
             ClearPedBloodDamage(PlayerPedId())
             ClearPedWetness(PlayerPedId())
             ClearPedEnvDirt(PlayerPedId())
@@ -274,7 +203,7 @@ CreateThread(function()
             SetRainLevel(0.0)
             SetWindSpeed(0.0)
             Wait(300)
-        elseif type == "medium" then
+        elseif loopType == "medium" then
             ClearAllBrokenGlass()
             ClearAllHelpMessages()
             LeaderboardsReadClearAll()
@@ -293,4 +222,3 @@ CreateThread(function()
         end
     end
 end)
-
