@@ -3,19 +3,19 @@ local loopType = nil
 
 -- Functions
 
---@param toggle shadow boolean
---@param toggle air boolean
+---@param toggle shadow boolean
+---@param toggle air boolean
 local function setShadowAndAir(shadow, air)
     RopeDrawShadowEnabled(shadow)
     CascadeShadowsClearShadowSampleType()
     CascadeShadowsSetAircraftMode(air)
 end
 
---@param toggle entity boolean
---@param toggle dynamic boolean
---@param toggle tracker number
---@param toggle depth number
---@param toggle bounds number
+---@param toggle entity boolean
+---@param toggle dynamic boolean
+---@param toggle tracker number
+---@param toggle depth number
+---@param toggle bounds number
 local function setEntityTracker(entity, dynamic, tracker, depth, bounds)
     CascadeShadowsEnableEntityTracker(entity)
     CascadeShadowsSetDynamicDepthMode(dynamic)
@@ -24,19 +24,19 @@ local function setEntityTracker(entity, dynamic, tracker, depth, bounds)
     CascadeShadowsSetCascadeBoundsScale(bounds)
 end
 
---@param toggle distance number
---@param toggle tweak number
+---@param toggle distance number
+---@param toggle tweak number
 local function setLights(distance, tweak)
     SetFlashLightFadeDistance(distance)
     SetLightsCutoffDistanceTweak(tweak)
 end
 
---@param notify message string
+---@param notify message string
 local function notify(message)
     print(message)
 end
 
---@param FPSBoost type string
+---@param FPSBoost type string
 local function umfpsBooster(type)
     if type == "reset" then
         setShadowAndAir(true, true)
