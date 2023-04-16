@@ -36,6 +36,12 @@ local function notify(message)
     print(message)
 end
 
+
+
+-- Commands
+
+
+
 ---@param type string
 local function umfpsBooster(type)
     if type == "reset" then
@@ -66,14 +72,59 @@ local function umfpsBooster(type)
     loopType = type
 end
 
--- Commands
+RegisterCommand("fps", function()
+    lib.registerContext({
+        id = 'some_menu',
+        title = 'FPS Booster',
+        options = {
+    
+          {
+            title = 'Reset',
+            description = 'Resets to Normal',
+            icon = 'circle',
+            onSelect = function()
+            choice = "reset"
+            umfpsBooster(choice)
+            end,
+          },
+          {
+            title = 'Low',
+            description = 'Switches FPS to Low',
+            icon = 'circle',
+            onSelect = function()
+            choice = "low"
+            umfpsBooster(choice)
+              end,
+          },
+          {
+            title = 'Ultra Low',
+            description = 'Switches FPS to Ultra Low',
+            icon = 'circle',
+            onSelect = function()
+            choice = "ulow"
+            umfpsBooster(choice)
+            end,
+          },
+          {
+            title = 'Medium',
+            description = 'Switches FPS to Medium',
+            icon = 'circle',
+            onSelect = function()
+            choice = "medium"
+            umfpsBooster(choice)
+            end,
+          },
+        }
+    })
+    lib.showContext("some_menu")
+end)
 
-RegisterCommand("fps", function(_,args) 
+RegisterCommand("fpscommand", function(_,args) 
     if args[1] == nil then
         notify("Usage: /fps [reset/ulow/low/medium]")
         return
     end
-    umfpsBooster(args[1]) 
+    umfpsBooster(args[1])
 end, false)
 
 -- Main Loop
