@@ -60,7 +60,7 @@ local function umfpsBooster(type)
         notify("Mode: Medium")
     else
         notify("Usage: /fps [reset/ulow/low/medium]")
-        notify("Invalid type: "..type)
+        notify("Invalid type: " .. type)
         return
     end
     loopType = type
@@ -68,12 +68,12 @@ end
 
 -- Commands
 
-RegisterCommand("fps", function(_,args) 
+RegisterCommand("fps", function(_, args)
     if args[1] == nil then
         notify("Usage: /fps [reset/ulow/low/medium]")
         return
     end
-    umfpsBooster(args[1]) 
+    umfpsBooster(args[1])
 end, false)
 
 -- Main Loop
@@ -83,7 +83,7 @@ CreateThread(function()
     while true do
         if loopType == "ulow" then
             --// Find closest ped and set the alpha
-            for ped in GetWorldPeds() do
+            for _, ped in ipairs(GetGamePool('CPed')) do
                 if not IsEntityOnScreen(ped) then
                     SetEntityAlpha(ped, 0)
                 else
@@ -97,7 +97,7 @@ CreateThread(function()
                 Wait(1)
             end
             --// Find closest object and set the alpha
-            for obj in GetWorldObjects() do
+            for _, obj in ipairs(GetGamePool('CObject')) do
                 if not IsEntityOnScreen(obj) then
                     SetEntityAlpha(obj, 0)
                     SetEntityAsNoLongerNeeded(obj)
@@ -115,7 +115,7 @@ CreateThread(function()
             RemoveParticleFxInRange(GetEntityCoords(PlayerPedId()), 10.0)
         elseif loopType == "low" then
             --// Find closest ped and set the alpha
-            for ped in GetWorldPeds() do
+            for _, ped in ipairs(GetGamePool('CPed')) do
                 if not IsEntityOnScreen(ped) then
                     SetEntityAlpha(ped, 0)
                 else
@@ -129,7 +129,7 @@ CreateThread(function()
                 Wait(1)
             end
             --// Find closest object and set the alpha
-            for obj in GetWorldObjects() do
+            for _, obj in ipairs(GetGamePool('CObject')) do
                 if not IsEntityOnScreen(obj) then
                     SetEntityAlpha(obj, 0)
                     SetEntityAsNoLongerNeeded(obj)
@@ -146,7 +146,7 @@ CreateThread(function()
             RemoveParticleFxInRange(GetEntityCoords(PlayerPedId()), 10.0)
         elseif loopType == "medium" then
             --// Find closest ped and set the alpha
-            for ped in GetWorldPeds() do
+            for _, ped in ipairs(GetGamePool('CPed')) do
                 if not IsEntityOnScreen(ped) then
                     SetEntityAlpha(ped, 0)
                 else
@@ -158,7 +158,7 @@ CreateThread(function()
                 Wait(1)
             end
             --// Find closest object and set the alpha
-            for obj in GetWorldObjects() do
+            for _, obj in ipairs(GetGamePool('CObject')) do
                 if not IsEntityOnScreen(obj) then
                     SetEntityAlpha(obj, 0)
                     SetEntityAsNoLongerNeeded(obj)
@@ -181,6 +181,7 @@ CreateThread(function()
     while true do
         if loopType == "ulow" or loopType == "low" then
             local ped = PlayerPedId()
+
             ClearAllBrokenGlass()
             ClearAllHelpMessages()
             LeaderboardsReadClearAll()
